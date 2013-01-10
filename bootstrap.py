@@ -8,6 +8,7 @@ import os
 from datetime import datetime
 
 ROOT = os.path.abspath(os.path.dirname(__file__))
+USER = os.getlogin()
 
 REQ = os.path.join(ROOT, 'requires')
 REQ_INIT = os.path.join(REQ, '__init__.py')
@@ -40,7 +41,7 @@ Created on {0}
 
 @author: {1}
 
-'''.format(datetime.now().strftime('%B %d %Y'), os.getlogin())
+'''.format(datetime.now().strftime('%B %d %Y'), USER)
 
     if not open_string:
         doc += '"""'
