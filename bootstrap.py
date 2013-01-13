@@ -310,11 +310,11 @@ Core handlers
 """
 import sys
 sys.dont_write_bytecode = True
-from tornado.web import RequestHandler
+from utils.server import Handler
 # from tornado.template import Loader  # Template loader
 
 
-class Main(RequestHandler):
+class Main(Handler):
     """
     Main request handler for core app.
     """
@@ -339,6 +339,7 @@ class Main(RequestHandler):
         # template = template.load(self.template_file)
         # self.write(template.generate())
 
+        super(Main, self).get(*args, **kwargs)
         self.write("Bootstrapped for TornadoWeb")
 
     def post(self, *args, **kwargs):
