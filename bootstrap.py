@@ -13,6 +13,10 @@ USER = os.getlogin()
 REQ = os.path.join(ROOT, 'requires')
 REQ_INIT = os.path.join(REQ, '__init__.py')
 
+UTILS = os.path.join(ROOT, 'utils')
+UTILS_INIT = os.path.join(UTILS, '__init__.py')
+UTILS_SERV = os.path.join(UTILS, 'server.py')
+
 SETTINGS = os.path.join(REQ, 'settings.py')
 
 CORE = os.path.join(ROOT, 'core')
@@ -24,6 +28,7 @@ README = os.path.join(ROOT, 'readme.md')
 
 HAS_REQ = 'requires' in os.listdir(ROOT)
 HAS_CORE = 'core' in os.listdir(ROOT)
+HAS_UTILS = 'utils' in os.listdir(ROOT)
 
 try:
     HAS_SETTINGS = 'settings.py' in os.listdir(REQ)
@@ -191,6 +196,81 @@ if __name__ == '__main__':
     return doc
 
 
+def gen_utils_init():
+    '''
+    Generate package structure for requires.
+    '''
+
+    doc = '''
+"""
+Utils package
+"""
+import sys
+sys.dont_write_bytecode = True
+from utils.server import Handler
+
+__all__ = ['Handler']
+
+if __name__ == '__main__':
+    pass
+'''
+
+    return doc
+
+
+def gen_utils_server():
+    '''
+    Generate package structure for utils.
+    '''
+
+    doc = '''
+# pylint: disable=R0904
+"""
+Utils.
+"""
+import sys
+sys.dont_write_bytecode = True
+from tornado.web import RequestHandler
+
+
+class Handler(RequestHandler):
+    """
+    Base request handler overridden with required decorators and data
+    members.
+    """
+
+    # Add required handler members.
+    def __init__(self, *args, **kwargs):
+        """
+        Handler init.
+        """
+        super(Handler, self).__init__(*args, **kwargs)
+
+    # Add decorators here
+    def get(self, *args, **kwargs):
+        """
+        HTTP GET Request handler method.
+        """
+        pass
+
+    # Add decorators here
+    def post(self, *args, **kwargs):
+        """
+        HTTP POST Request handler method.
+        """
+        pass
+
+
+__all__ = ['Handler']
+
+
+if __name__ == '__main__':
+    pass
+'''
+
+    return doc
+
+
 def gen_core_urls():
     '''
     Generate urlmap for core app.
@@ -344,12 +424,24 @@ if __name__ == '__main__':
     else:
         pass
 
+    if not HAS_UTILS:
+        os.mkdir('utils')
+    else:
+        pass
+
     print "Generating requirements package..."
     with open(REQ_INIT, 'w') as rifile:
         rifile.write(gen_req_package())
     print "Generating settings module..."
     with open(SETTINGS, 'w') as sfile:
         sfile.write(gen_settings_str())
+
+    print "Generating utils package..."
+    with open(UTILS_INIT, 'w') as uifile:
+        uifile.write(gen_utils_init())
+    print "Generating server module..."
+    with open(UTILS_SERV, 'w') as usfile:
+        usfile.write(gen_utils_server())
 
     print "Generating core app package..."
     with open(CORE_INIT, 'w') as cifile:
