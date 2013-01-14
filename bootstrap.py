@@ -16,6 +16,7 @@ REQ_INIT = os.path.join(REQ, '__init__.py')
 UTILS = os.path.join(ROOT, 'utils')
 UTILS_INIT = os.path.join(UTILS, '__init__.py')
 UTILS_SERV = os.path.join(UTILS, 'server.py')
+UTILS_DECOR = os.path.join(UTILS, 'decorators.py')
 
 SETTINGS = os.path.join(REQ, 'settings.py')
 
@@ -271,6 +272,49 @@ if __name__ == '__main__':
     return doc
 
 
+def gen_utils_decorators():
+    '''
+    Generate decorator module structure for utils.
+    '''
+
+    doc = '''
+# pylint: disable=R0904
+"""
+Utils.
+"""
+import sys
+sys.dont_write_bytecode = True
+from functools import wraps
+
+
+def is_authenticated(method):
+    """
+    Basic authenticated check decorator.
+    """
+
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        """
+        Wrapper method for is_authenticated decorator.
+        """
+
+        #  Add decorator flow.
+
+        return method(self, *args, **kwargs)
+
+    return wrapper
+
+
+__all__ = ['is_authenticated']
+
+
+if __name__ == '__main__':
+    pass
+'''
+
+    return doc
+
+
 def gen_core_urls():
     '''
     Generate urlmap for core app.
@@ -436,6 +480,7 @@ if __name__ == '__main__':
     print "Generating settings module..."
     with open(SETTINGS, 'w') as sfile:
         sfile.write(gen_settings_str())
+    print "Completed generating requirements package"
 
     print "Generating utils package..."
     with open(UTILS_INIT, 'w') as uifile:
@@ -443,6 +488,10 @@ if __name__ == '__main__':
     print "Generating server module..."
     with open(UTILS_SERV, 'w') as usfile:
         usfile.write(gen_utils_server())
+    print "Generating decorators module..."
+    with open(UTILS_DECOR, 'w') as udfile:
+        udfile.write(gen_utils_decorators())
+    print "Completed generating utils package"
 
     print "Generating core app package..."
     with open(CORE_INIT, 'w') as cifile:
@@ -453,6 +502,7 @@ if __name__ == '__main__':
     print "Generating handlers for core app..."
     with open(CORE_HANDLERS, 'w') as chfile:
         chfile.write(gen_core_handlers())
+    print "Completed generating core app package"
 
     print "Generating main.py for bootstrap..."
     with open('main.py', 'w') as mfile:
