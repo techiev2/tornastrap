@@ -477,17 +477,12 @@ from utils.server import Handler
 from tornado.template import Loader
 
 
-class Main(Handler):
-    """
-    Main request handler for %s app.
-    """
-
 __all__ = []
 
 
 if __name__ == '__main__':
     pass
-''' % (user_app_name, user_app_name)
+''' % (user_app_name)
 
     return doc
 
