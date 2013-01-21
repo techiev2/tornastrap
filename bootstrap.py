@@ -6,6 +6,7 @@ import sys
 sys.dont_write_bytecode = True
 import os
 from datetime import datetime
+import re
 
 ROOT = os.path.abspath(os.path.dirname(__file__))
 USER = os.getlogin()
@@ -544,6 +545,32 @@ if __name__ == '__main__':
     return doc
 
 
+def update_settings(user_app_name):
+    '''
+    Update settings file with generated user app.
+    '''
+
+    apps = None
+    settings = open(SETTINGS, "r").readlines()
+    settings_app = [x for x in settings if "'APPS':" in x][0]
+    settings_at = settings.index(settings_app)
+
+    apps = re.findall('.*?\[(.*?)\].*?', settings_app.strip())
+    if apps and len(apps) == 1:
+        apps = apps[0]
+    if apps:
+        base_apps = apps
+        apps = [x.strip() for x in apps.split(',')]
+        apps.extend(["'%s'" % user_app_name])
+        apps = ', '.join(apps)
+
+    settings_app = re.sub(base_apps, apps, settings_app)
+    settings[settings_at] = settings_app
+    settings = reduce(lambda a, b: a + b, settings)
+    with open(SETTINGS, "w") as sfile:
+        sfile.write(settings)
+
+
 if __name__ == '__main__':
 
     app_name = None
@@ -567,7 +594,10 @@ if __name__ == '__main__':
             print "Generating handlers for app ~ %s..." % app_name
             with open(APP_HANDLER(app_name), 'w') as ahfile:
                 ahfile.write(gen_app_handlers(app_name))
+            print "Updating settings file with app ~ %s" % app_name
+            update_settings(app_name)
             print "Completed generating app ~ %s" % app_name
+
 
     # Bootstrap stack generation flow
     elif '--stack' in sys.argv and len(
