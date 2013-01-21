@@ -31,6 +31,12 @@ HAS_REQ = 'requires' in os.listdir(ROOT)
 HAS_CORE = 'core' in os.listdir(ROOT)
 HAS_UTILS = 'utils' in os.listdir(ROOT)
 
+HAS_APP = lambda app: app in os.listdir(ROOT)
+APP_INIT = lambda app: os.path.join(os.path.join(ROOT, app), '__init__.py')
+APP_HANDLER = lambda app: os.path.join(os.path.join(ROOT, app), 'handlers.py')
+APP_URLS = lambda app: os.path.join(os.path.join(ROOT, app), 'urls.py')
+
+
 try:
     HAS_SETTINGS = 'settings.py' in os.listdir(REQ)
 except OSError:
@@ -197,6 +203,29 @@ if __name__ == '__main__':
     return doc
 
 
+def gen_user_app(user_app_name):
+    '''
+    Generate package structure for user app.
+    '''
+
+    doc = '''
+"""
+%s app.
+"""
+import sys
+sys.dont_write_bytecode = True
+import core.urls
+from core.urls import URLS
+
+__all__ = ['URLS']
+
+if __name__ == '__main__':
+    pass
+''' % (user_app_name)
+
+    return doc
+
+
 def gen_utils_init():
     '''
     Generate package structure for requires.
@@ -341,6 +370,32 @@ if __name__ == '__main__':
     return doc
 
 
+def gen_app_urls(user_app_name):
+    '''
+    Generate urlmap for core app.
+    '''
+
+    doc = gen_docstring(open_string=True)
+
+    doc += '''URL map for %s app.
+"""
+
+from core.handlers import Main
+''' % (user_app_name)
+
+    doc += '''
+URLS = [('/$', Main)]
+
+__all__ = ['URLS']
+
+
+if __name__ == '__main__':
+    pass
+'''
+
+    return doc
+
+
 def gen_core_handlers():
     '''
     Generate base handler for core app.
@@ -403,6 +458,68 @@ if __name__ == '__main__':
     return doc
 
 
+def gen_app_handlers(user_app_name):
+    '''
+    Generate base handler for user app.
+    '''
+
+    doc = '''
+# pylint: disable=R0904
+
+"""
+%s app handlers
+"""
+import sys
+sys.dont_write_bytecode = True
+from utils.server import Handler
+# from tornado.template import Loader  # Template loader
+
+
+class Main(Handler):
+    """
+    Main request handler for %s app.
+    """
+
+    def __init__(self, *args, **kwargs):
+        """
+        Main request handler init.
+        """
+        super(Main, self).__init__(*args, **kwargs)
+        self.template_file = 'index.html'
+
+    def get(self, *args, **kwargs):
+        """
+        HTTP GET Request handler method for Main handler.
+        """
+
+        # Template loader and generator flow. Setup a template path
+        # in settings, template file in init and load the template as
+        # below.
+
+        # template = Loader(self.settings['template_path'])
+        # template = template.load(self.template_file)
+        # self.write(template.generate())
+
+        super(Main, self).get(*args, **kwargs)
+        self.write("Bootstrapped for TornadoWeb")
+
+    def post(self, *args, **kwargs):
+        """
+        HTTP POST Request handler method for Main handler.
+        """
+        pass
+
+
+__all__ = ['Main']
+
+
+if __name__ == '__main__':
+    pass
+''' % (user_app_name, user_app_name)
+
+    return doc
+
+
 def gen_readme():
     '''
     Generate a readme file for Bootstrapped setup.
@@ -459,56 +576,84 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
 
-    if not HAS_REQ:
-        os.mkdir('requires')
+    app_name = None
+
+    if '--app' in sys.argv and len(sys.argv) >= 3 and sys.argv[1] == '--app':
+        app_name = sys.argv[2]
+
+    # App structure generation
+    if app_name:
+        if not 'main.py' in os.listdir(ROOT):
+            sys.exit('App generation works only inside bootstrapped env.')
+        else:
+            if not HAS_APP(app_name):
+                os.mkdir(app_name)
+            print "Generating application ~ %s..." % app_name
+            with open(APP_INIT(app_name), 'w') as aifile:
+                aifile.write(gen_user_app(app_name))
+            print "Generting url map for app ~ %s..." % app_name
+            with open(APP_URLS(app_name), 'w') as aufile:
+                aufile.write(gen_app_urls(app_name))
+            print "Generating handlers for app ~ %s..." % app_name
+            with open(APP_HANDLER(app_name), 'w') as ahfile:
+                ahfile.write(gen_app_handlers(app_name))
+            print "Completed generating app ~ %s" % app_name
+
+    # Bootstrap stack generation flow
+    elif '--stack' in sys.argv and len(
+            sys.argv) >= 2 and sys.argv[1] == '--stack':
+        if not HAS_REQ:
+            os.mkdir('requires')
+        else:
+            pass
+
+        if not HAS_CORE:
+            os.mkdir('core')
+        else:
+            pass
+
+        if not HAS_UTILS:
+            os.mkdir('utils')
+        else:
+            pass
+
+        print "Generating requirements package..."
+        with open(REQ_INIT, 'w') as rifile:
+            rifile.write(gen_req_package())
+        print "Generating settings module..."
+        with open(SETTINGS, 'w') as sfile:
+            sfile.write(gen_settings_str())
+        print "Completed generating requirements package"
+
+        print "Generating utils package..."
+        with open(UTILS_INIT, 'w') as uifile:
+            uifile.write(gen_utils_init())
+        print "Generating server module..."
+        with open(UTILS_SERV, 'w') as usfile:
+            usfile.write(gen_utils_server())
+        print "Generating decorators module..."
+        with open(UTILS_DECOR, 'w') as udfile:
+            udfile.write(gen_utils_decorators())
+        print "Completed generating utils package"
+
+        print "Generating core app package..."
+        with open(CORE_INIT, 'w') as cifile:
+            cifile.write(gen_core_app())
+        print "Generting url map for core package..."
+        with open(CORE_URLS, 'w') as cufile:
+            cufile.write(gen_core_urls())
+        print "Generating handlers for core app..."
+        with open(CORE_HANDLERS, 'w') as chfile:
+            chfile.write(gen_core_handlers())
+        print "Completed generating core app package"
+
+        print "Generating main.py for bootstrap..."
+        with open('main.py', 'w') as mfile:
+            mfile.write(gen_main())
+
+        print "Generating readme markdown..."
+        with open(README, 'w') as rfile:
+            rfile.write(gen_readme())
+        print "Completed bootstrapping. Start the server with main.py"
     else:
-        pass
-
-    if not HAS_CORE:
-        os.mkdir('core')
-    else:
-        pass
-
-    if not HAS_UTILS:
-        os.mkdir('utils')
-    else:
-        pass
-
-    print "Generating requirements package..."
-    with open(REQ_INIT, 'w') as rifile:
-        rifile.write(gen_req_package())
-    print "Generating settings module..."
-    with open(SETTINGS, 'w') as sfile:
-        sfile.write(gen_settings_str())
-    print "Completed generating requirements package"
-
-    print "Generating utils package..."
-    with open(UTILS_INIT, 'w') as uifile:
-        uifile.write(gen_utils_init())
-    print "Generating server module..."
-    with open(UTILS_SERV, 'w') as usfile:
-        usfile.write(gen_utils_server())
-    print "Generating decorators module..."
-    with open(UTILS_DECOR, 'w') as udfile:
-        udfile.write(gen_utils_decorators())
-    print "Completed generating utils package"
-
-    print "Generating core app package..."
-    with open(CORE_INIT, 'w') as cifile:
-        cifile.write(gen_core_app())
-    print "Generting url map for core package..."
-    with open(CORE_URLS, 'w') as cufile:
-        cufile.write(gen_core_urls())
-    print "Generating handlers for core app..."
-    with open(CORE_HANDLERS, 'w') as chfile:
-        chfile.write(gen_core_handlers())
-    print "Completed generating core app package"
-
-    print "Generating main.py for bootstrap..."
-    with open('main.py', 'w') as mfile:
-        mfile.write(gen_main())
-
-    print "Generating readme markdown..."
-    with open(README, 'w') as rfile:
-        rfile.write(gen_readme())
-    print "Completed bootstrapping. Start the server with main.py"
+        sys.exit('Invalid parameters')
