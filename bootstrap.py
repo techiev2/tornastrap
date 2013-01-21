@@ -216,14 +216,14 @@ def gen_user_app(user_app_name):
 """
 import sys
 sys.dont_write_bytecode = True
-import core.urls
-from core.urls import URLS
+import %s.urls
+from %s.urls import URLS
 
 __all__ = ['URLS']
 
 if __name__ == '__main__':
     pass
-''' % (user_app_name)
+''' % (user_app_name, user_app_name, user_app_name)
 
     return doc
 
