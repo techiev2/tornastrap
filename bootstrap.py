@@ -380,7 +380,7 @@ def gen_app_urls(user_app_name):
     doc += '''URL map for %s app.
 """
 
-from core.handlers import Main
+# import application specific handlers
 ''' % (user_app_name)
 
     doc += '''
@@ -429,17 +429,17 @@ class Main(Handler):
         """
         HTTP GET Request handler method for Main handler.
         """
+        super(Main, self).get(*args, **kwargs)
+        self.write("Bootstrapped for TornadoWeb")
 
         # Template loader and generator flow. Setup a template path
         # in settings, template file in init and load the template as
-        # below.
+        # below in place of the self.write above.
 
         # template = Loader(self.settings['template_path'])
         # template = template.load(self.template_file)
         # self.write(template.generate())
 
-        super(Main, self).get(*args, **kwargs)
-        self.write("Bootstrapped for TornadoWeb")
 
     def post(self, *args, **kwargs):
         """
@@ -485,7 +485,7 @@ __all__ = []
 
 if __name__ == '__main__':
     pass
-''' % (user_app_name)
+''' % (user_app_name, user_app_name)
 
     return doc
 
