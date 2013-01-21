@@ -384,7 +384,7 @@ from core.handlers import Main
 ''' % (user_app_name)
 
     doc += '''
-URLS = [('/$', Main)]
+URLS = [()]  # Fill up app specific urlmap
 
 __all__ = ['URLS']
 
@@ -472,7 +472,7 @@ def gen_app_handlers(user_app_name):
 import sys
 sys.dont_write_bytecode = True
 from utils.server import Handler
-# from tornado.template import Loader  # Template loader
+from tornado.template import Loader
 
 
 class Main(Handler):
@@ -480,42 +480,12 @@ class Main(Handler):
     Main request handler for %s app.
     """
 
-    def __init__(self, *args, **kwargs):
-        """
-        Main request handler init.
-        """
-        super(Main, self).__init__(*args, **kwargs)
-        self.template_file = 'index.html'
-
-    def get(self, *args, **kwargs):
-        """
-        HTTP GET Request handler method for Main handler.
-        """
-
-        # Template loader and generator flow. Setup a template path
-        # in settings, template file in init and load the template as
-        # below.
-
-        # template = Loader(self.settings['template_path'])
-        # template = template.load(self.template_file)
-        # self.write(template.generate())
-
-        super(Main, self).get(*args, **kwargs)
-        self.write("Bootstrapped for TornadoWeb")
-
-    def post(self, *args, **kwargs):
-        """
-        HTTP POST Request handler method for Main handler.
-        """
-        pass
-
-
-__all__ = ['Main']
+__all__ = []
 
 
 if __name__ == '__main__':
     pass
-''' % (user_app_name, user_app_name)
+''' % (user_app_name)
 
     return doc
 
