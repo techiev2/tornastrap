@@ -85,6 +85,7 @@ def gen_settings():
     '''
 
     doc = '''
+# Use this lambda to generate absolute path for template/static.
 GEN_PATH = lambda path: os.path.join(os.getcwd(), path)
 
 SETTINGS = {
@@ -130,7 +131,7 @@ def gen_app():
 APP = Application(URLS, **SETTINGS)
 SERVER = HTTPServer(APP)
 LOOP = IOLoop.instance()
-PORT = 8888
+PORT = 8888  # Default port. main.py picks the default from here.
 
 
 if __name__ == '__main__':
