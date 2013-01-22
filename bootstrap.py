@@ -386,7 +386,7 @@ def gen_app_urls(user_app_name):
 ''' % (user_app_name)
 
     doc += '''
-URLS = [()]  # Fill up app specific urlmap
+URLS = []  # Fill up app specific urlmap
 
 __all__ = ['URLS']
 
