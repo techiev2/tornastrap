@@ -12,17 +12,20 @@ import re
 ROOT = os.path.abspath(os.path.dirname(__file__))
 USER = os.getlogin()
 
-REQ = os.path.join(ROOT, 'requires')
+REQ = 'requires'
+REQ = os.path.join(ROOT, REQ)
 REQ_INIT = os.path.join(REQ, '__init__.py')
 
-UTILS = os.path.join(ROOT, 'utils')
+UTILS = 'utils'
+UTILS = os.path.join(ROOT, UTILS)
 UTILS_INIT = os.path.join(UTILS, '__init__.py')
 UTILS_SERV = os.path.join(UTILS, 'server.py')
 UTILS_DECOR = os.path.join(UTILS, 'decorators.py')
 
 SETTINGS = os.path.join(REQ, 'settings.py')
 
-CORE = os.path.join(ROOT, 'core')
+CORE = 'core'
+CORE = os.path.join(ROOT, CORE)
 CORE_INIT = os.path.join(CORE, '__init__.py')
 CORE_URLS = os.path.join(CORE, 'urls.py')
 CORE_HANDLERS = os.path.join(CORE, 'handlers.py')
@@ -142,9 +145,9 @@ if __name__ == '__main__':
 
 
 def gen_settings_str():
-    '''
+    """
     Generate settings module for application.
-    '''
+    """
 
     settings_str = ''
     settings_str += gen_docstring()
@@ -384,7 +387,7 @@ def gen_app_urls(user_app_name):
 """
 
 # import application specific handlers
-''' % (user_app_name)
+''' % user_app_name
 
     doc += '''
 URLS = []  # Fill up app specific urlmap
@@ -483,7 +486,7 @@ __all__ = []
 
 if __name__ == '__main__':
     pass
-''' % (user_app_name)
+''' % user_app_name
 
     return doc
 
@@ -547,7 +550,7 @@ def update_settings(user_app_name):
     Update settings file with generated user app.
     """
 
-    apps = None
+    base_apps = None
     settings = open(SETTINGS, "r").readlines()
     settings_app = [x for x in settings if "'APPS':" in x][0]
     settings_at = settings.index(settings_app)
@@ -570,87 +573,103 @@ def update_settings(user_app_name):
 
 if __name__ == '__main__':
 
-    app_name = None
+    is_stack = has_stack_dir = False
 
-    if '--app' in sys.argv and len(sys.argv) >= 3 and sys.argv[1] == '--app':
-        app_name = sys.argv[2]
-
-    # App structure generation
-    if app_name:
-        if not 'main.py' in os.listdir(ROOT):
-            sys.exit('App generation works only inside bootstrapped env.')
+    if len(sys.argv) >= 2:
+        is_stack = '--stack' in sys.argv
+        if len(sys.argv) < 3:
+            has_stack_dir = False
         else:
-            if not HAS_APP(app_name):
-                os.mkdir(app_name)
-            print "Generating application ~ %s..." % app_name
-            with open(APP_INIT(app_name), 'w') as aifile:
-                aifile.write(gen_user_app(app_name))
-            print "Generting url map for app ~ %s..." % app_name
-            with open(APP_URLS(app_name), 'w') as aufile:
-                aufile.write(gen_app_urls(app_name))
-            print "Generating handlers for app ~ %s..." % app_name
-            with open(APP_HANDLER(app_name), 'w') as ahfile:
-                ahfile.write(gen_app_handlers(app_name))
-            print "Updating settings file with app ~ %s" % app_name
-            update_settings(app_name)
-            print "Completed generating app ~ %s" % app_name
+            has_stack_dir = True
 
-
-    # Bootstrap stack generation flow
-    elif '--stack' in sys.argv and len(
-            sys.argv) >= 2 and sys.argv[1] == '--stack':
-        if not HAS_REQ:
-            os.mkdir('requires')
+    if is_stack:
+        if not has_stack_dir:
+            stack_dir = raw_input("Stack folder name")
         else:
-            pass
+            stack_dir = sys.argv[2]
+        print stack_dir
 
-        if not HAS_CORE:
-            os.mkdir('core')
-        else:
-            pass
+    # app_name = None
+    #
+    # if '--app' in sys.argv and len(sys.argv) >= 3 and sys.argv[1] == '--app':
+    #     app_name = sys.argv[2]
 
-        if not HAS_UTILS:
-            os.mkdir('utils')
-        else:
-            pass
-
-        print "Generating requirements package..."
-        with open(REQ_INIT, 'w') as rifile:
-            rifile.write(gen_req_package())
-        print "Generating settings module..."
-        with open(SETTINGS, 'w') as sfile:
-            sfile.write(gen_settings_str())
-        print "Completed generating requirements package"
-
-        print "Generating utils package..."
-        with open(UTILS_INIT, 'w') as uifile:
-            uifile.write(gen_utils_init())
-        print "Generating server module..."
-        with open(UTILS_SERV, 'w') as usfile:
-            usfile.write(gen_utils_server())
-        print "Generating decorators module..."
-        with open(UTILS_DECOR, 'w') as udfile:
-            udfile.write(gen_utils_decorators())
-        print "Completed generating utils package"
-
-        print "Generating core app package..."
-        with open(CORE_INIT, 'w') as cifile:
-            cifile.write(gen_core_app())
-        print "Generting url map for core package..."
-        with open(CORE_URLS, 'w') as cufile:
-            cufile.write(gen_core_urls())
-        print "Generating handlers for core app..."
-        with open(CORE_HANDLERS, 'w') as chfile:
-            chfile.write(gen_core_handlers())
-        print "Completed generating core app package"
-
-        print "Generating main.py for bootstrap..."
-        with open('main.py', 'w') as mfile:
-            mfile.write(gen_main())
-
-        print "Generating readme markdown..."
-        with open(README, 'w') as rfile:
-            rfile.write(gen_readme())
-        print "Completed bootstrapping. Start the server with main.py"
-    else:
-        sys.exit('Invalid parameters')
+    # # App structure generation
+    # if app_name:
+    #     if not 'main.py' in os.listdir(ROOT):
+    #         sys.exit('App generation works only inside bootstrapped env.')
+    #     else:
+    #         if not HAS_APP(app_name):
+    #             os.mkdir(app_name)
+    #         print "Generating application ~ %s..." % app_name
+    #         with open(APP_INIT(app_name), 'w') as aifile:
+    #             aifile.write(gen_user_app(app_name))
+    #         print "Generting url map for app ~ %s..." % app_name
+    #         with open(APP_URLS(app_name), 'w') as aufile:
+    #             aufile.write(gen_app_urls(app_name))
+    #         print "Generating handlers for app ~ %s..." % app_name
+    #         with open(APP_HANDLER(app_name), 'w') as ahfile:
+    #             ahfile.write(gen_app_handlers(app_name))
+    #         print "Updating settings file with app ~ %s" % app_name
+    #         update_settings(app_name)
+    #         print "Completed generating app ~ %s" % app_name
+    #
+    #
+    # # Bootstrap stack generation flow
+    # elif '--stack' in sys.argv and len(
+    #         sys.argv) >= 2 and sys.argv[1] == '--stack':
+    #     if not HAS_REQ:
+    #         os.mkdir('requires')
+    #     else:
+    #         pass
+    #
+    #     if not HAS_CORE:
+    #         os.mkdir('core')
+    #     else:
+    #         pass
+    #
+    #     if not HAS_UTILS:
+    #         os.mkdir('utils')
+    #     else:
+    #         pass
+    #
+    #     print "Generating requirements package..."
+    #     with open(REQ_INIT, 'w') as rifile:
+    #         rifile.write(gen_req_package())
+    #     print "Generating settings module..."
+    #     with open(SETTINGS, 'w') as sfile:
+    #         sfile.write(gen_settings_str())
+    #     print "Completed generating requirements package"
+    #
+    #     print "Generating utils package..."
+    #     with open(UTILS_INIT, 'w') as uifile:
+    #         uifile.write(gen_utils_init())
+    #     print "Generating server module..."
+    #     with open(UTILS_SERV, 'w') as usfile:
+    #         usfile.write(gen_utils_server())
+    #     print "Generating decorators module..."
+    #     with open(UTILS_DECOR, 'w') as udfile:
+    #         udfile.write(gen_utils_decorators())
+    #     print "Completed generating utils package"
+    #
+    #     print "Generating core app package..."
+    #     with open(CORE_INIT, 'w') as cifile:
+    #         cifile.write(gen_core_app())
+    #     print "Generting url map for core package..."
+    #     with open(CORE_URLS, 'w') as cufile:
+    #         cufile.write(gen_core_urls())
+    #     print "Generating handlers for core app..."
+    #     with open(CORE_HANDLERS, 'w') as chfile:
+    #         chfile.write(gen_core_handlers())
+    #     print "Completed generating core app package"
+    #
+    #     print "Generating main.py for bootstrap..."
+    #     with open('main.py', 'w') as mfile:
+    #         mfile.write(gen_main())
+    #
+    #     print "Generating readme markdown..."
+    #     with open(README, 'w') as rfile:
+    #         rfile.write(gen_readme())
+    #     print "Completed bootstrapping. Start the server with main.py"
+    # else:
+    #     sys.exit('Invalid parameters')
