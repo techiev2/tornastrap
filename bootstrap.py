@@ -1,8 +1,9 @@
-'''
+"""
 Tornadoweb bootstrapper.
-'''
+"""
 
 import sys
+
 sys.dont_write_bytecode = True
 import os
 from datetime import datetime
@@ -37,7 +38,6 @@ APP_INIT = lambda app: os.path.join(os.path.join(ROOT, app), '__init__.py')
 APP_HANDLER = lambda app: os.path.join(os.path.join(ROOT, app), 'handlers.py')
 APP_URLS = lambda app: os.path.join(os.path.join(ROOT, app), 'urls.py')
 
-
 try:
     HAS_SETTINGS = 'settings.py' in os.listdir(REQ)
 except OSError:
@@ -45,9 +45,9 @@ except OSError:
 
 
 def gen_docstring(open_string=False):
-    '''
+    """
     Generate docstring.
-    '''
+    """
 
     doc = '''"""
 Created on {0}
@@ -63,9 +63,9 @@ Created on {0}
 
 
 def gen_base_imports():
-    '''
+    """
     Generate basic imports.
-    '''
+    """
 
     doc = '''
 import sys
@@ -80,9 +80,9 @@ from tornado.ioloop import IOLoop
 
 
 def gen_settings():
-    '''
+    """
     Generate settings.
-    '''
+    """
 
     doc = '''
 # Use this lambda to generate absolute path for template/static.
@@ -106,9 +106,9 @@ URLS = [('/src/(.*?)$', StaticFileHandler,
 
 
 def gen_app_loader():
-    '''
+    """
     Generate app loader.
-    '''
+    """
 
     doc = '''
 if SETTINGS['APPS']:
@@ -123,9 +123,9 @@ if SETTINGS['APPS']:
 
 
 def gen_app():
-    '''
+    """
     Generate application object invocation.
-    '''
+    """
 
     doc = '''
 APP = Application(URLS, **SETTINGS)
@@ -160,9 +160,9 @@ def gen_settings_str():
 
 
 def gen_req_package():
-    '''
+    """
     Generate package structure for requires.
-    '''
+    """
 
     doc = '''
 """
@@ -183,9 +183,9 @@ if __name__ == '__main__':
 
 
 def gen_core_app():
-    '''
+    """
     Generate package structure for core app.
-    '''
+    """
 
     doc = '''
 """
@@ -206,9 +206,10 @@ if __name__ == '__main__':
 
 
 def gen_user_app(user_app_name):
-    '''
+    """
     Generate package structure for user app.
-    '''
+    :param: user_app_name: Provides the application name to bootstrap
+    """
 
     doc = '''
 """
@@ -229,9 +230,9 @@ if __name__ == '__main__':
 
 
 def gen_utils_init():
-    '''
+    """
     Generate package structure for requires.
-    '''
+    """
 
     doc = '''
 """
@@ -251,9 +252,9 @@ if __name__ == '__main__':
 
 
 def gen_utils_server():
-    '''
+    """
     Generate package structure for utils.
-    '''
+    """
 
     doc = '''
 # pylint: disable=R0904
@@ -304,9 +305,9 @@ if __name__ == '__main__':
 
 
 def gen_utils_decorators():
-    '''
+    """
     Generate decorator module structure for utils.
-    '''
+    """
 
     doc = '''
 # pylint: disable=R0904
@@ -347,9 +348,9 @@ if __name__ == '__main__':
 
 
 def gen_core_urls():
-    '''
+    """
     Generate urlmap for core app.
-    '''
+    """
 
     doc = gen_docstring(open_string=True)
 
@@ -373,9 +374,9 @@ if __name__ == '__main__':
 
 
 def gen_app_urls(user_app_name):
-    '''
+    """
     Generate urlmap for core app.
-    '''
+    """
 
     doc = gen_docstring(open_string=True)
 
@@ -399,9 +400,9 @@ if __name__ == '__main__':
 
 
 def gen_core_handlers():
-    '''
+    """
     Generate base handler for core app.
-    '''
+    """
 
     doc = '''
 # pylint: disable=R0904
@@ -461,9 +462,9 @@ if __name__ == '__main__':
 
 
 def gen_app_handlers(user_app_name):
-    '''
+    """
     Generate base handler for user app.
-    '''
+    """
 
     doc = '''
 # pylint: disable=R0904
@@ -488,9 +489,9 @@ if __name__ == '__main__':
 
 
 def gen_readme():
-    '''
+    """
     Generate a readme file for Bootstrapped setup.
-    '''
+    """
 
     doc = '''
 === README for Tornastrap ===
@@ -504,9 +505,9 @@ Applications are self contained as packages and are added to the
 
 
 def gen_main():
-    '''
+    """
     Generate main.py for app.
-    '''
+    """
 
     doc = gen_docstring()
 
@@ -542,9 +543,9 @@ if __name__ == '__main__':
 
 
 def update_settings(user_app_name):
-    '''
+    """
     Update settings file with generated user app.
-    '''
+    """
 
     apps = None
     settings = open(SETTINGS, "r").readlines()
